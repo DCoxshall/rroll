@@ -2,10 +2,8 @@ use clap::Parser;
 use regex::Regex;
 use rand::prelude::*;
 
-/// Search for a pattern in a file and display the lines that contain it.
 #[derive(Parser)]
 struct Cli {
-    /// The pattern to look for
     #[clap(num_args = 1..)]
     pattern: Vec<String>,
 }
