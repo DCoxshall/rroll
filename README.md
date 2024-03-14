@@ -16,3 +16,7 @@ Total: 31
 ```
 
 Each line is the roll for one "group" of dice. The third line in our example output shows `[9, 1, 10] + 1 : 21`, meaning that the results of the three dice rolls were 9, 1, and 10 (`3d10`), and after adding those numbers plus the "delta" of 1 (`+1`), we get 21.
+
+## Installation
+
+Clone this repository and run `cargo install --path .` in the project root.
