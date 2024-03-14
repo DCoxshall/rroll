@@ -23,7 +23,8 @@ fn main() {
 
     for i in &cli.pattern {
         if !roll_regex.is_match(i) {
-            panic!("Invalid roll syntax.");
+            println!("Invalid syntax for roll: {}. Syntax for rolls is NdN+N, where N is an integer greater than zero.", i);
+            std::process::exit(-1);
         }
     }
 
