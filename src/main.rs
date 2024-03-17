@@ -8,21 +8,31 @@ struct Cli {
     pattern: Vec<String>,
 }
 
+/// Represents a roll of a collection of the same dice.
 #[derive(Debug)]
 struct Roll {
-    fst: i32,
-    snd: i32,
+    /// The number of dice to roll. For "1d20+3", `times` is 1.
+    times: i32,
+    /// The number of sides that the rolling dice have. For "1d20+3", `sides` is 20.
+    sides: i32,
+    /// The added "bonus". For "1d20+3", `delta` is 3. `delta` need not be positive.
     delta: i32,
 }
 
 fn main() {
     let cli = Cli::parse();
+
+    if cli.pattern.len() == 0 {
+        println!("No dice rolled. Total: 0");
+        std::process::exit(1);
+    }
+
     let roll_regex = Regex::new(r"^([1-9][0-9]*)*[dD][1-9][0-9]*(\+[0-9]+)?$").unwrap();
 
     for i in &cli.pattern {
         if !roll_regex.is_match(i) {
             println!("Invalid syntax for roll: {}. Syntax for rolls is NdN+N, where N is an integer greater than zero.", i);
-            std::process::exit(-1);
+            std::process::exit(1);
         }
     }
 
@@ -51,11 +61,9 @@ fn print_roll(roll_vector: &Vec<i32>, delta: i32, total: i32) {
 fn simulate_roll(roll: &Roll) -> Vec<i32> {
     let mut res = vec![];
     let mut rng = rand::thread_rng();
-    let mut y: i32;
 
-    for _ in 0..roll.fst {
-        y = rng.gen_range(1..=roll.snd);
-        res.push(y);
+    for _ in 0..roll.times {
+        res.push(rng.gen_range(1..=roll.sides));
     }
 
     res
@@ -66,17 +74,34 @@ fn parse_rolls(rolls: Vec<String>) -> Vec<Roll> {
     
     for roll in rolls {
         let parts: Vec<&str> = roll.split(['d', 'D', '+']).collect();
-        let fst: i32 = parts.get(0).unwrap().parse().unwrap();
-        let snd: i32 = parts.get(1).unwrap().parse().unwrap();
-        let delta: i32;
-    
-        if parts.len() == 2 {
-            delta = 0;
+
+        let times = match parts.get(0).unwrap().parse::<i32>() {
+            Ok(t) => t,
+            Err(_) => {
+                println!("Number {} is too large.", parts.first().unwrap());
+                std::process::exit(1);
+            }
+        };
+
+        let sides = match parts.get(1).unwrap().parse::<i32>() {
+            Ok(t) => t,
+            Err(_) => {
+                println!("Number {} is too large.", parts.get(1).unwrap());
+                std::process::exit(1);
+            }
+        };
+
+        let delta = if parts.len() == 2{
+            0
         } else {
-            delta = parts.get(2).unwrap().parse().unwrap();
-        }
-    
-        res.push(Roll { fst, snd, delta });
+            match parts.get(2).unwrap().parse() {
+                Ok(t) => t,
+                Err(_) =>{ println!("Number {} is too large.", parts.first().unwrap());
+                std::process::exit(1);}
+            }
+        };
+
+        res.push(Roll { times, sides, delta });
     }
 
     res
