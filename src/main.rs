@@ -1,6 +1,6 @@
 use clap::Parser;
-use regex::Regex;
 use rand::prelude::*;
+use regex::Regex;
 
 #[derive(Parser)]
 struct Cli {
@@ -27,7 +27,7 @@ fn main() {
         std::process::exit(1);
     }
 
-    let roll_regex = Regex::new(r"^([1-9][0-9]*)*[dD][1-9][0-9]*(\+[0-9]+)?$").unwrap();
+    let roll_regex = Regex::new(r"^([1-9][0-9]*)*[dD][1-9][0-9]*((\+|-)[0-9]+)?$").unwrap();
 
     for i in &cli.pattern {
         if !roll_regex.is_match(i) {
@@ -51,11 +51,11 @@ fn main() {
 }
 
 fn print_roll(roll_vector: &Vec<i32>, delta: i32, total: i32) {
-        print!("{:?} ", roll_vector);
-        if delta != 0 {
-            print!("+ {} ", delta);
-        }
-        println!(": {}", total);
+    print!("{:?} ", roll_vector);
+    if delta != 0 {
+        print!("+ {} ", delta);
+    }
+    println!(": {}", total);
 }
 
 fn simulate_roll(roll: &Roll) -> Vec<i32> {
@@ -71,9 +71,9 @@ fn simulate_roll(roll: &Roll) -> Vec<i32> {
 
 fn parse_rolls(rolls: Vec<String>) -> Vec<Roll> {
     let mut res = vec![];
-    
+
     for roll in rolls {
-        let parts: Vec<&str> = roll.split(['d', 'D', '+']).collect();
+        let parts: Vec<&str> = roll.split(['d', 'D', '+', '-']).collect();
 
         let times = match parts.get(0).unwrap().parse::<i32>() {
             Ok(t) => t,
@@ -91,17 +91,27 @@ fn parse_rolls(rolls: Vec<String>) -> Vec<Roll> {
             }
         };
 
-        let delta = if parts.len() == 2{
+        let mut delta = if parts.len() == 2 {
             0
         } else {
             match parts.get(2).unwrap().parse() {
                 Ok(t) => t,
-                Err(_) =>{ println!("Number {} is too large.", parts.first().unwrap());
-                std::process::exit(1);}
+                Err(_) => {
+                    println!("Number {} is too large.", parts.first().unwrap());
+                    std::process::exit(1);
+                }
             }
         };
 
-        res.push(Roll { times, sides, delta });
+        if roll.contains('-') {
+            delta *= -1;
+        }
+
+        res.push(Roll {
+            times,
+            sides,
+            delta,
+        });
     }
 
     res
