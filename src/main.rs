@@ -52,8 +52,10 @@ fn main() {
 
 fn print_roll(roll_vector: &Vec<i32>, delta: i32, total: i32) {
     print!("{:?} ", roll_vector);
-    if delta != 0 {
+    if delta > 0 {
         print!("+ {} ", delta);
+    } else if delta < 0 {
+        print!("- {} ", -delta);
     }
     println!(": {}", total);
 }
