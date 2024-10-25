@@ -31,7 +31,7 @@ fn main() {
 
     for i in &cli.pattern {
         if !roll_regex.is_match(i) {
-            println!("Invalid syntax for roll: {}. Syntax for rolls is NdN+N, where N is an integer greater than zero.", i);
+            println!("Invalid syntax for roll: {}. Syntax for rolls is xdy+z, where x, y and z are integers greater than zero.", i);
             std::process::exit(1);
         }
     }
